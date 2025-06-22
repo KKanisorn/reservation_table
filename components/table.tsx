@@ -59,7 +59,7 @@ export default function table(){
             return ( time >= res.startTime && time <= res.endTime)  && resDay === day;
         })
         if(matching){
-            console.log("Match")
+            console.log("Match From Function")
             return (
                 <div key={timeIndex} className={`border-gray-400 text-sm  ${dayColor[day as keyof typeof dayColor] || ""} h-20 border-b bg-black`}>
                     {matching.startTime === time && <div>{matching.name}</div>}
@@ -67,7 +67,6 @@ export default function table(){
             )
         }
         else{
-            console.log("Tap")
             return (
                 <div key={timeIndex} className={`h-20 border-b border-gray-400`}></div>
             )
@@ -153,46 +152,11 @@ export default function table(){
                                 {day}
                             </div>
                             {times.map((time, timeIndex) =>{
-                                // console.log(typeof(time))
                                 if(!time.includes("30")) {
-                                    // reservationMap(time,day,timeIndex)
-                                    const matching = reservation.find((res) =>{
-                                        const resDay = res.date.toLocaleDateString("en-US", {weekday:"long"});
-                                        return ( time >= res.startTime && time <= res.endTime)  && resDay === day;
-                                    })
-                                    if(matching){
-                                        // console.log("Match")
-                                        return (
-                                            <div key={timeIndex} className={`border-gray-400 text-sm  ${dayColor[day as keyof typeof dayColor] || ""} h-20 border-b bg-black`}>
-                                                {matching.startTime === time && <div>{matching.name}</div>}
-                                            </div>
-                                        )
-                                    }
-                                    else{
-                                        return (
-                                            <div key={timeIndex} className={`h-20 border-b border-gray-400`}></div>
-                                        )
-                                    }
+                                    return reservationMap(time,day,timeIndex)
                                 }else{
 
-                                    // reservationMap(time,day,timeIndex)
-                                    const matching = reservation.find((res) =>{
-                                        const resDay = res.date.toLocaleDateString("en-US", {weekday:"long"});
-                                        return ( time >= res.startTime && time <= res.endTime)  && resDay === day;
-                                    })
-                                    if(matching){
-                                        console.log("Match")
-                                        return (
-                                            <div key={timeIndex} className={`border-gray-400 text-sm  ${dayColor[day as keyof typeof dayColor] || ""} h-20 border-b bg-black`}>
-                                                {matching.startTime === time && <div>{matching.name}</div>}
-                                            </div>
-                                        )
-                                    }
-                                    else{
-                                        return (
-                                            <div key={timeIndex} className={`h-20 border-b border-gray-400`}></div>
-                                        )
-                                    }
+                                    return (reservationMap(time,day,timeIndex))
                                 }
                             })}
                         </>
