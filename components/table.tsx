@@ -33,7 +33,13 @@ export default function table(){
             name : "kanisorn",
             date : new Date("2025-06-22"),
             startTime : "11:00",
-            endTime : "12:00",
+            endTime : "13:00",
+        },
+        {
+            name : "kanisorn2",
+            date : new Date("2025-06-21"),
+            startTime : "11:30",
+            endTime : "13:00",
         }
     ]
 
@@ -75,8 +81,8 @@ export default function table(){
                                 <svg className="w-6 h-5 text-white dark:text-white" aria-hidden="true"
                                      xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
                                      viewBox="0 0 24 24">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                          stroke-width="2"
+                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
+                                          strokeWidth="2"
                                           d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
                                 </svg>
                             </div>
@@ -112,34 +118,53 @@ export default function table(){
                                 {day}
                             </div>
                             {times.map((time, timeIndex) =>{
-                                    if(!time.includes("30")){
-
-                                        {reservation.map((res, resIndex) => {
-                                            // console.log(res.date.toLocaleDateString("en-US", {weekday: "long"}));
-
-                                            if(res.startTime === time && res.date.toLocaleDateString("en-US", {weekday: "long"})){
-                                                console.log(res.startTime)
-                                                console.log(res.date.toLocaleDateString("en-US", {weekday: "long"}));
-                                                console.log("Matched")
-
-                                                return (
-                                                    <div key={timeIndex} className={` ${dayColor[day as keyof typeof dayColor] || ""} h-20`}>HELLO</div>
-
-                                                )
-                                            }
-                                        })}
+                                if(!time.includes("30")) {
+                                    let resData: {
+                                        date: Date;
+                                        name: string;
+                                        startTime: string;
+                                        endTime: string
+                                    }
+                                    const matching = reservation.find((res) =>{
+                                        const resDay = res.date.toLocaleDateString("en-US", {weekday:"long"});
+                                        resData = res
+                                        return ( time >= res.startTime && time <= res.endTime)  && resDay === day;
+                                    })
+                                    if(matching){
+                                        console.log("Match")
                                         return (
-                                            <div key={timeIndex} className={`h-20 border-b `}></div>
+                                            <div key={timeIndex} className={` text-sm  ${dayColor[day as keyof typeof dayColor] || ""} h-20 border-b bg-black`}>
+                                                {resData.startTime === time && <div>{resData.name}</div>}
+                                            </div>
                                         )
-
-
                                     }
                                     else{
-
+                                        return (
+                                            <div key={timeIndex} className={`h-20 border-b`}></div>
+                                        )
                                     }
                                 }
-                                // <div key={timeIndex} className="h-20 border-b"></div>
-                            )}
+
+
+                                        // {reservation.map((res, resIndex) => {
+                                        //     // console.log(res.date.toLocaleDateString("en-US", {weekday: "long"}));
+                                        //
+                                        //     if(res.startTime === time && res.date.toLocaleDateString("en-US", {weekday: "long"})){
+                                        //         console.log(res.startTime)
+                                        //         console.log(res.date.toLocaleDateString("en-US", {weekday: "long"}));
+                                        //         console.log("Matched")
+                                        //
+                                        //         return (
+                                        //             <div key={timeIndex} className={`bg-black`}>HELLO</div>
+                                        //
+                                        //         )
+                                        //     }
+                                        // })}
+
+
+
+
+                            })}
                         </>
                     ))}
                 </div>
