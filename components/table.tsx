@@ -1,4 +1,5 @@
 import {useEffect, useState} from "react";
+import {match} from "node:assert";
 
 
 export default function table(){
@@ -6,10 +7,11 @@ export default function table(){
     const [ firstDay, setFirstDay] = useState(new Date());
     const [ lastDay, setLastDay] = useState(new Date());
 
+    // const firstDay = new Date();
+    // const lastDay = new Date();
+
     // const times = ['11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00']
     const times = [
-        "11:00", "11:30",
-        "12:00", "12:30",
         "13:00", "13:30",
         "14:00", "14:30",
         "15:00", "15:30",
@@ -23,8 +25,7 @@ export default function table(){
         "23:00", "23:30",
         "00:00", "00:30",
         "01:00", "01:30",
-        "02:00", "02:30",
-        "03:00"
+        "02:00"
     ]
     const days = ["Monday",'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -32,14 +33,18 @@ export default function table(){
         {
             name : "kanisorn",
             date : new Date("2025-06-22"),
-            startTime : "11:00",
-            endTime : "13:00",
+            startTime : "13:30",
+            endTime : "15:00",
+            price : 0,
+            duration : 2
         },
         {
             name : "kanisorn2",
             date : new Date("2025-06-21"),
-            startTime : "11:30",
-            endTime : "13:00",
+            startTime : "13:30",
+            endTime : "14:30",
+            price : 0,
+            duration : 1.5
         }
     ]
 
@@ -56,13 +61,64 @@ export default function table(){
     function reservationMap(time:string, day:string, timeIndex:number){
         const matching = reservation.find((res) =>{
             const resDay = res.date.toLocaleDateString("en-US", {weekday:"long"});
-            return ( time >= res.startTime && time <= res.endTime)  && resDay === day;
+            return ( time >= res.startTime && time <= res.endTime) && resDay === day && res.date >= firstDay && res.date <= lastDay;
         })
+
         if(matching){
-            console.log("Match From Function")
+            // console.log(matching)
+// console.log(new Date(matching.startTime)
+// console.log(matching.startTime)
+// console.log(matching.endTime)
+// console.log(time)
+// const middleTime = matching.duration;
+            const dateTime = new Date()
+            // const hour = matching.startTime.split(":")
+// console.log(hour)
+//             dateTime.setHours(Number(hour[0]), Number(hour[1]), 0)
+//             dateTime.setHours(dateTime.getHours() + matching.duration)
+            // console.log(dateTime.toTimeString().slice(0, 5))
+            const firstPartName = matching.name.slice(0,matching.name.length/2)
+            const secondPartName = matching.name.slice(matching.name.length/2,matching.name.length)
+            const firstPartDate = matching.date.toLocaleDateString("en-US").slice(0,matching.name.length/2)
+            const secondPartDate = matching.date.toLocaleDateString("en-US").slice(matching.name.length/2,matching.name.length+1)
+
+            console.log(secondPartDate)
+
+            // const secondTime = new Date(matching.date+"T"+matching.startTime+"+07:00")
+            // console.log(matching.date)
+            const [hour, minute] = matching.startTime.split(":").map(Number)
+            // console.log(hour, minute)
+            matching.date.setHours(hour,minute+30)
+            const secondTime = String(matching.date.toLocaleTimeString("en-GB", {
+                hour12:false,
+                hour: '2-digit',
+                minute: '2-digit'
+            }));
+
+            // console.log(secondTime.toLocaleTimeString())
+            // secondTime.setHours(secondTime.getHours() + 0.5);
+            // console.log(secondTime.toLocaleDateString())
+            // console.log(firstPartName + secondPartName)
+            // console.log(secondPartName)
+
+
             return (
-                <div key={timeIndex} className={`border-gray-400 text-sm  ${dayColor[day as keyof typeof dayColor] || ""} h-20 border-b bg-black`}>
-                    {matching.startTime === time && <div>{matching.name}</div>}
+                <div key={timeIndex} className={`border-gray-400 text-sm  ${dayColor[day as keyof typeof dayColor] || ""} ${time === matching.startTime ? "rounded-l-lg" : `${time === matching.endTime ? "rounded-r-lg" : ""}`} h-20 border-b bg-black`}>
+                    {matching.startTime === time && matching.endTime !== time &&
+                        <div className="flex flex-col justify-center items-end">
+                            <div className="font-semibold">{firstPartName}</div>
+                            <div className="text-xs">{firstPartDate}</div>
+                            <div className="text-xs">{matching.startTime} -</div>
+                            <div className="text-xs">{matching.price}</div>
+                        </div>
+                    }{
+                        secondTime === time &&
+                    <div className="flex flex-col justify-center items-start">
+                        <div className="font-semibold">{secondPartName}</div>
+                        <div className="text-xs">{secondPartDate}</div>
+                        <div className="text-xs">{matching.endTime}</div>
+                    </div>
+                }
                 </div>
             )
         }
@@ -77,16 +133,27 @@ export default function table(){
 
 
     useEffect(() => {
-        // console.log(date.getDay())
+
         // console.log(date.getDate()-date.getDay())
         // console.log(date.getMonth())
         // console.log(date.getDate()+date.getDay())
 
-        firstDay.setDate(date.getDate()-date.getDay())
-        lastDay.setDate(date.getDate()+(6-date.getDay()))
-        console.log(firstDay)
-        console.log(lastDay);
-    })
+        // firstDay.setDate(date.getDate()-date.getDay())
+        // lastDay.setDate(date.getDate()+(6-date.getDay()))
+
+        const defaultFirstDay = new Date();
+        const defaultLastDay = new Date();
+
+
+
+        defaultFirstDay.setDate(date.getDate() - (6-date.getDay()))
+        defaultLastDay.setDate(date.getDate() + (date.getDay()))
+
+        setFirstDay(defaultFirstDay);
+        setLastDay(defaultLastDay);
+        // console.log("First Day is: " + defaultFirstDay)
+        // console.log("Last Day is: " + defaultLastDay)
+    }, [])
 
     return (
         <div className="grid grid-rows-12 h-screen">
@@ -119,7 +186,7 @@ export default function table(){
                 </div>
             </div>
             <div className="row-span-10 bg-gray-100 ">
-                <div className="grid grid-cols-[200px_repeat(33,1fr)] grid-rows-[repeat(8,auto)]">
+                <div className="grid grid-cols-[130px_repeat(27,1fr)] grid-rows-[repeat(8,auto)]">
                     <div className="border border-gray-400 text-sm font-semibold">Days</div>
                     {times.map((time,timeIndex) => {
 
@@ -136,14 +203,6 @@ export default function table(){
                                 </div>
                             )
                         }
-
-                        // if(!time.includes("30")){
-                        //     return (
-                        //         <div key={timeIndex} className="border text-center">
-                        //             {time}
-                        //         </div>
-                        //     )
-                        // }
                     })}
                     {days.map((day, index) => (
                         <>
