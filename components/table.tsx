@@ -1,12 +1,22 @@
 import {useEffect, useState} from "react";
-import {match} from "node:assert";
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs, { Dayjs } from 'dayjs';
+import TextField from '@mui/material/TextField';
+
+import AddReservation from '@/components/addReservation';
 
 
 export default function table(){
     const [ date, setDate ] = useState(new Date());
-    const [ firstDay, setFirstDay] = useState(new Date());
-    const [ lastDay, setLastDay] = useState(new Date());
+    const [firstDay, setFirstDay] = useState(new Date());
+    const [lastDay, setLastDay] = useState(new Date());
 
+    const [ isAddReservation, setIsAddReservation ] = useState(false);
+
+    lastDay.setHours(0,0,0,0)
+    firstDay.setHours(0,0,0,0)
     // const firstDay = new Date();
     // const lastDay = new Date();
 
@@ -32,8 +42,24 @@ export default function table(){
     const reservation = [
         {
             name : "kanisorn",
+            date : new Date("2025-06-16"),
+            startTime : "13:00",
+            endTime : "15:00",
+            price : 0,
+            duration : 2
+        },
+        {
+            name : "kanisorn",
+            date : new Date("2025-06-28"),
+            startTime : "13:00",
+            endTime : "15:00",
+            price : 0,
+            duration : 2
+        },
+        {
+            name : "kanisorn",
             date : new Date("2025-06-22"),
-            startTime : "13:30",
+            startTime : "13:00",
             endTime : "15:00",
             price : 0,
             duration : 2
@@ -60,34 +86,23 @@ export default function table(){
 
     function reservationMap(time:string, day:string, timeIndex:number){
         const matching = reservation.find((res) =>{
+            res.date.setHours(0,0,0,0)
+
             const resDay = res.date.toLocaleDateString("en-US", {weekday:"long"});
             return ( time >= res.startTime && time <= res.endTime) && resDay === day && res.date >= firstDay && res.date <= lastDay;
         })
 
+
+
         if(matching){
-            // console.log(matching)
-// console.log(new Date(matching.startTime)
-// console.log(matching.startTime)
-// console.log(matching.endTime)
-// console.log(time)
-// const middleTime = matching.duration;
-            const dateTime = new Date()
-            // const hour = matching.startTime.split(":")
-// console.log(hour)
-//             dateTime.setHours(Number(hour[0]), Number(hour[1]), 0)
-//             dateTime.setHours(dateTime.getHours() + matching.duration)
-            // console.log(dateTime.toTimeString().slice(0, 5))
+
             const firstPartName = matching.name.slice(0,matching.name.length/2)
             const secondPartName = matching.name.slice(matching.name.length/2,matching.name.length)
-            const firstPartDate = matching.date.toLocaleDateString("en-US").slice(0,matching.name.length/2)
-            const secondPartDate = matching.date.toLocaleDateString("en-US").slice(matching.name.length/2,matching.name.length+1)
+            const firstPartDate = matching.date.toLocaleDateString("en-US",{month : "short", day : "2-digit"}).slice(0,matching.name.length/2)
+            const secondPartDate = matching.date.toLocaleDateString("en-US",{month : "short", day : "2-digit"}).slice(matching.name.length/2,matching.name.length+1)
 
-            console.log(secondPartDate)
 
-            // const secondTime = new Date(matching.date+"T"+matching.startTime+"+07:00")
-            // console.log(matching.date)
             const [hour, minute] = matching.startTime.split(":").map(Number)
-            // console.log(hour, minute)
             matching.date.setHours(hour,minute+30)
             const secondTime = String(matching.date.toLocaleTimeString("en-GB", {
                 hour12:false,
@@ -95,15 +110,8 @@ export default function table(){
                 minute: '2-digit'
             }));
 
-            // console.log(secondTime.toLocaleTimeString())
-            // secondTime.setHours(secondTime.getHours() + 0.5);
-            // console.log(secondTime.toLocaleDateString())
-            // console.log(firstPartName + secondPartName)
-            // console.log(secondPartName)
-
-
             return (
-                <div key={timeIndex} className={`border-gray-400 text-sm  ${dayColor[day as keyof typeof dayColor] || ""} ${time === matching.startTime ? "rounded-l-lg" : `${time === matching.endTime ? "rounded-r-lg" : ""}`} h-20 border-b bg-black`}>
+                <div key={timeIndex} className={`border-gray-400 text-sm  ${dayColor[day as keyof typeof dayColor] || ""} ${time === matching.startTime ? "rounded-l-xl ml-1" : `${time === matching.endTime ? "rounded-r-xl mr-1" : ""}`}  h-20 border-b bg-black`}>
                     {matching.startTime === time && matching.endTime !== time &&
                         <div className="flex flex-col justify-center items-end">
                             <div className="font-semibold">{firstPartName}</div>
@@ -115,7 +123,7 @@ export default function table(){
                         secondTime === time &&
                     <div className="flex flex-col justify-center items-start">
                         <div className="font-semibold">{secondPartName}</div>
-                        <div className="text-xs">{secondPartDate}</div>
+                        <div className="text-xs"> {secondPartDate}</div>
                         <div className="text-xs">{matching.endTime}</div>
                     </div>
                 }
@@ -129,50 +137,102 @@ export default function table(){
         }
     }
 
+    const handleAddReservation = () => {
+        setIsAddReservation(!isAddReservation);
+        console.log(isAddReservation);
+    }
+
 
 
 
     useEffect(() => {
 
-        // console.log(date.getDate()-date.getDay())
-        // console.log(date.getMonth())
-        // console.log(date.getDate()+date.getDay())
-
-        // firstDay.setDate(date.getDate()-date.getDay())
-        // lastDay.setDate(date.getDate()+(6-date.getDay()))
-
-        const defaultFirstDay = new Date();
-        const defaultLastDay = new Date();
+        const defaultFirstDay = new Date(date);
+        const defaultLastDay = new Date(date);
 
 
+        const day = date.getDay();
+        const diffToMonday = day === 0 ? -6 : 1 - day;
+        defaultFirstDay.setDate(date.getDate() + diffToMonday);
 
-        defaultFirstDay.setDate(date.getDate() - (6-date.getDay()))
-        defaultLastDay.setDate(date.getDate() + (date.getDay()))
+        const diffToSunday = day === 0 ? 0 : 7 - day;
+        defaultLastDay.setDate(date.getDate() + diffToSunday);
 
-        setFirstDay(defaultFirstDay);
-        setLastDay(defaultLastDay);
-        // console.log("First Day is: " + defaultFirstDay)
-        // console.log("Last Day is: " + defaultLastDay)
-    }, [])
+        setFirstDay(defaultFirstDay)
+        setLastDay(defaultLastDay)
+
+        // console.log(defaultFirstDay.toLocaleDateString())
+        // console.log(defaultLastDay.toLocaleDateString());
+
+        console.log(firstDay)
+        console.log(lastDay)
+
+    }, [date])
 
     return (
         <div className="grid grid-rows-12 h-screen">
             <div className="row-span-2 bg-gray-200">
                 <div className="flex flex-col  pt-2 pl-3 pb-3 space-y-2">
                     <div className="flex flex-row justify-center text-xl font-bold">Reservation Table</div>
-                    <div className="flex flex-row justify-center text-md font-semibold">{firstDay.toUTCString().slice(0,16)} - {lastDay.toUTCString().slice(0,16)}</div>
+                    <div className="flex flex-row justify-center text-md font-semibold">{firstDay.toLocaleDateString().slice(0,16)} - {lastDay.toLocaleDateString().slice(0,16)}</div>
                     <div className="space-x-2">
-                        <button className="bg-black text-white sm:py-2 sm:px-3 md:py-3 md:px-4 rounded-lg text-sm font-semibold inline-flex space-x-1">
-                            <div>SELECT DATE</div>
-                            <div>
-                                <svg className="w-6 h-5 text-white dark:text-white" aria-hidden="true"
-                                     xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"
-                                     viewBox="0 0 24 24">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"
-                                          strokeWidth="2"
-                                          d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>
-                                </svg>
-                            </div>
+                        {/*<button className=" sm:py-2 sm:px-3 md:py-3 md:px-4 rounded-lg text-sm font-semibold">*/}
+                            {/*<div>SELECT DATE</div>*/}
+                            {/*<div>*/}
+                            {/*    <svg className="w-6 h-5 text-white dark:text-white" aria-hidden="true"*/}
+                            {/*         xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none"*/}
+                            {/*         viewBox="0 0 24 24">*/}
+                            {/*        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"*/}
+                            {/*              strokeWidth="2"*/}
+                            {/*              d="M4 10h16M8 14h8m-4-7V4M7 7V4m10 3V4M5 20h14a1 1 0 0 0 1-1V7a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1Z"/>*/}
+                            {/*    </svg>*/}
+                            {/*</div>*/}
+                        {/*</button>*/}
+
+                        <LocalizationProvider dateAdapter={AdapterDayjs}>
+                            <DatePicker
+                                value={dayjs(date)}
+                                onChange={(newValue) => {
+                                    setDate(newValue?.toDate() || date);
+                                }}
+                                slotProps={{
+                                    textField: {
+                                        variant: 'outlined',
+                                        InputProps: {
+                                            sx: {
+                                                backgroundColor: 'black',
+                                                color: 'white',
+                                                fontWeight: 600, // font-semibold
+                                                fontSize: '0.875rem', // text-sm
+                                                borderRadius: '0.5rem', // rounded-lg
+                                                height : 44,
+                                                marginRight : 1,
+                                            },
+                                        },
+                                        InputLabelProps: {
+                                            sx: {
+                                                color: 'white',
+                                            },
+                                        },
+                                        sx: {
+                                            '& .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: 'white',
+                                            },
+                                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: 'white',
+                                            },
+                                            '& .MuiSvgIcon-root': {
+                                                color: 'white',
+                                            },
+                                        },
+                                    },
+                                }}
+                            />
+                        </LocalizationProvider>
+                        <button
+                            className="bg-black text-white sm:py-2 sm:px-3 md:py-3 md:px-4 rounded-lg text-sm font-semibold "
+                            onClick={handleAddReservation}
+                        >Add Reservation
                         </button>
                         <button
                             className="bg-black text-white sm:py-2 sm:px-3 md:py-3 md:px-4 rounded-lg text-sm font-semibold ">Save
@@ -214,7 +274,6 @@ export default function table(){
                                 if(!time.includes("30")) {
                                     return reservationMap(time,day,timeIndex)
                                 }else{
-
                                     return (reservationMap(time,day,timeIndex))
                                 }
                             })}
@@ -222,6 +281,13 @@ export default function table(){
                     ))}
                 </div>
             </div>
+
+            {isAddReservation &&
+                <div className="fixed inset-0  flex items-center justify-center z-50 h-screen">
+                    <AddReservation/>
+                </div>
+            }
+
         </div>
     )
 }
