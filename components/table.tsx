@@ -1,3 +1,5 @@
+"use client"
+
 import {useEffect, useState} from "react";
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -138,7 +140,7 @@ export default function table(){
     }
 
     const handleAddReservation = () => {
-        setIsAddReservation(!isAddReservation);
+        setIsAddReservation(true);
         console.log(isAddReservation);
     }
 
@@ -283,8 +285,8 @@ export default function table(){
             </div>
 
             {isAddReservation &&
-                <div className="fixed inset-0  flex items-center justify-center z-50 h-screen">
-                    <AddReservation/>
+                <div className="fixed inset-0 flex items-center justify-center z-50 h-screen bg-gray-200/75e shadow-xs">
+                    <AddReservation setIsAddReservation={setIsAddReservation} />
                 </div>
             }
 
